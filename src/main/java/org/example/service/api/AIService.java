@@ -83,7 +83,7 @@ public class AIService {
                 request,
                 OpenRouterResponse.class
         );
-        log.info("Ответ от OpenRouter получен");
+        log.info("Ответ от OpenRouter получен: {}",response);
 
         if (useCache || refreshCache) {
             log.debug("Сохраняю ответ в кэш для города: {}", city);

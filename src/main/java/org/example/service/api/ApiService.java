@@ -48,6 +48,9 @@ public class ApiService {
                 })
                 .bodyValue(body)
                 .retrieve()
+                .onStatus(HttpStatusCode::isError, clientResponse ->
+                        Mono.error(new RuntimeException("Ошибка запроса: " + clientResponse.statusCode()))
+                )
                 .bodyToMono(responseType)
                 .block();
     }
