@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.example.dto.AI.Message;
 import org.example.dto.AI.request.ChatRequest;
+import org.example.dto.AI.request.Location;
 import org.example.dto.AI.response.OpenRouterResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,7 +24,7 @@ public class AIService {
     private String CHAT_API_KEY;
     private final static long CACHE_TTL = 30 * 60 * 1000;
 
-    private final Map<String,CachedAdvice> adviceMap = new HashMap<>();
+    private final Map<Location,CachedAdvice> adviceMap = new HashMap<>();
     private final ApiService apiService;
     private final ObjectMapper mapper;
 
@@ -33,14 +34,14 @@ public class AIService {
     }
 
     public OpenRouterResponse getAdvice(String responseAboutCurrentWeather, String responseAboutFutureWeather, boolean useCache, boolean refreshCache) {
-        String city = extractCity(responseAboutCurrentWeather);
+        Location location = extractLocation(responseAboutCurrentWeather);
         long currentMillis = System.currentTimeMillis();
 
-        log.info("Получение совета для города: {}", city);
+        log.info("Получение совета для города: {}", location);
         log.debug("useCache={}, refreshCache={}", useCache, refreshCache);
 
         if (useCache) {
-            CachedAdvice cached = adviceMap.get(city);
+            CachedAdvice cached = adviceMap.get(location);
             if (cached != null) {
                 long age = currentMillis - cached.timestamp;
                 log.debug("Найден кэш. Возраст: {} мс", age);
@@ -55,20 +56,35 @@ public class AIService {
             }
         }
 
-        log.info("Формирую запрос к AI-модели для города: {}", city);
+        log.info("Формирую запрос к AI-модели для города: {}", location);
         Message messageToAI = new Message();
         messageToAI.setRole("user");
         messageToAI.setContent("""
-        Ты — персональный ассистент по погоде и стилю.
-        ...
-        Данные о текущей погоде (JSON):
-        """ + responseAboutCurrentWeather + """
+            Ты — персональный ассистент по погоде и стилю, встроенный в телеграм-бота.
+            
+            Твоя задача — на основе данных о текущей погоде и прогноза на ближайшие 2 часа дать краткий, понятный и полезный совет по выбору одежды и образу жизни.
+            
+            Обрати внимание:
+            - Не упоминай точное время сейчас.
+            - Учитывай климат и культурные особенности страны, для которой запрошен прогноз.
+            - Не рекомендуй неподходящую одежду, например, не советуй надевать шубу, если на улице дождь и ветер.
+            - Советы должны быть реалистичными и соответствовать тому, как обычно одеваются люди в этой стране при таких погодных условиях.
+            - Не возвращай ответ в виде JSON или других структур данных. Ответ должен быть простым, живым, человеческим текстом.
+            - Пиши так, как будто ты реально советуешь человеку в чате, а не выдаёшь структурированный результат.
+            
+            Данные о стране:\s""" + location.getCountry() + """
+            
+            Данные о текущей погоде (JSON):
+            """ + responseAboutCurrentWeather + """
+            
+            Данные о прогнозе погоды на ближайшие 2 часа (JSON):
+            """ + responseAboutFutureWeather + """
+            
+            Сформулируй краткий и практичный совет, как лучше одеться на ближайшие 2 часа.
+            """);
 
-        Данные о прогнозе на день (JSON):
-        """ + responseAboutFutureWeather + """
 
-        Сформулируй понятный и полезный совет. Ответ нужно выдавать в markdown формате.
-        """);
+
 
         ChatRequest request = new ChatRequest(
                 "deepseek/deepseek-prover-v2:free",
@@ -86,19 +102,20 @@ public class AIService {
         log.info("Ответ от OpenRouter получен: {}",response);
 
         if (useCache || refreshCache) {
-            log.debug("Сохраняю ответ в кэш для города: {}", city);
-            adviceMap.put(city, new CachedAdvice(response, currentMillis));
+            log.debug("Сохраняю ответ в кэш для города: {}", location);
+            adviceMap.put(location, new CachedAdvice(response, currentMillis));
         }
 
         return response;
     }
 
-
-
-    private String extractCity(String json){
+    private Location extractLocation(String json) {
         try {
-            return mapper.readTree(json).get("location").get("name").asText();
-        }catch (JsonProcessingException e){
+            var node = mapper.readTree(json).get("location");
+            String city = node.get("name").asText();
+            String country = node.get("country").asText();
+            return new Location(city, country);
+        } catch (JsonProcessingException e) {
             throw new RuntimeException(e.getMessage());
         }
     }

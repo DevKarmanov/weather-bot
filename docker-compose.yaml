@@ -13,13 +13,5 @@ services:
       WEATHER_API_KEY: ${WEATHER_API_KEY}
       CHAT_API_KEY: ${CHAT_API_KEY}
       DB_URL: ${DB_URL}
-    networks:
-      - backend
     ports:
       - "5976:8080"
-
-
-
-networks:
-  backend:
-    driver: bridge

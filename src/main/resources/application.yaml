@@ -1,7 +1,7 @@
 bot:
-  token: ${BOT_TOKEN:7654604502:AAG4TQRU7hwgWFaSHc6YqRck9vn4nRqbcfU}
-  webHook: ${BOT_WEBHOOK_URL:/weather_ping}
-  name: ${BOT_NAME:superPuperWeatherCheckerBot}
+  token: ${BOT_TOKEN}
+  webHook: ${BOT_WEBHOOK_URL}
+  name: ${BOT_NAME}
 
 server:
   address: 0.0.0.0
@@ -10,9 +10,9 @@ server:
 
 spring:
   datasource:
-    username: ${POSTGRES_USER:postgres}
-    password: ${POSTGRES_PASSWORD:oxOKizZQzsXLNAWrIgtwkWhxwtxxSSmF}
-    url: ${DB_URL:jdbc:postgresql://caboose.proxy.rlwy.net:57027/railway}
+    username: ${POSTGRES_USER}
+    password: ${POSTGRES_PASSWORD}
+    url: ${DB_URL}
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
@@ -21,8 +21,8 @@ spring:
     open-in-view: false
 
 api:
-  weather-api-key: ${WEATHER_API_KEY:49539b12d8504b6b88f111135251705}
-  ai-api-key: ${CHAT_API_KEY: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}
+  weather-api-key: ${WEATHER_API_KEY}
+  ai-api-key: ${CHAT_API_KEY}
 
 logging:
   level:

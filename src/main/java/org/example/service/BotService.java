@@ -274,7 +274,12 @@ public class BotService {
         Long chatId = callbackQuery.getMessage().getChatId();
         Long userId =callbackQuery.getFrom().getId();
 
-        sendAdvice(userId,userRequests.get(userId),chatId,true,false,true);
+        String userPreviousText = userRequests.get(userId);
+        if (userPreviousText == null || userPreviousText.isEmpty()){
+            notifier.sendMessage(chatId,"Извините, сервер был перезагружен и ваш предыдущий запрос стёрся.\nОтправьте новый!");
+        }else {
+            sendAdvice(userId,userRequests.get(userId),chatId,true,false,true);
+        }
     }
 
     @BotScheduled(cron = "0 0 9-23/2 * * ?", zone = "Europe/Minsk", roles = "have-default-city")

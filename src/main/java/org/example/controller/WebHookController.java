@@ -18,10 +18,4 @@ public class WebHookController {
         System.out.println(update);
         botHandler.handleMessage(update);
     }
-
-
-    @GetMapping("/ping")
-    public String ping() {
-        return "OK";
-    }
 }
