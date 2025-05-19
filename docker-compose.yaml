@@ -14,8 +14,6 @@ services:
       CHAT_API_KEY: ${CHAT_API_KEY}
       DB_URL: ${DB_URL}
       PORT: ${PORT}
-    depends_on:
-      - postgres
     networks:
       - backend
     ports:
