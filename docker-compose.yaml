@@ -13,8 +13,6 @@ services:
       WEATHER_API_KEY: ${WEATHER_API_KEY}
       CHAT_API_KEY: ${CHAT_API_KEY}
       DB_URL: ${BOT_TOKEN}
-
-
     depends_on:
       - postgres
     networks:
