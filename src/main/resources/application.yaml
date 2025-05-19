@@ -1,0 +1,27 @@
+bot:
+  token: ${BOT_TOKEN:7654604502:AAG4TQRU7hwgWFaSHc6YqRck9vn4nRqbcfU}
+  webHook: ${BOT_WEBHOOK_URL:/weather_ping}
+  name: ${BOT_NAME:superPuperWeatherCheckerBot}
+
+server:
+  ssl:
+    enabled: false
+
+spring:
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/weather_bot_db}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    open-in-view: false
+
+api:
+  weather-api-key: ${WEATHER_API_KEY:49539b12d8504b6b88f111135251705}
+  ai-api-key: ${CHAT_API_KEY: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}
+
+logging:
+  level:
+    org.example: debug
+    dev.karmanov.library: debug
