@@ -4,10 +4,9 @@ bot:
   name: ${BOT_NAME:superPuperWeatherCheckerBot}
 
 server:
+  address: 0.0.0.0
   ssl:
     enabled: false
-  port: ${PORT:8080}
-
 
 spring:
   datasource:
