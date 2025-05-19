@@ -8,9 +8,13 @@ services:
       BOT_TOKEN: ${BOT_TOKEN}
       BOT_WEBHOOK_URL: ${BOT_WEBHOOK_URL}
       BOT_NAME: ${BOT_NAME}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       WEATHER_API_KEY: ${WEATHER_API_KEY}
       CHAT_API_KEY: ${CHAT_API_KEY}
-      DB_URL: jdbc:postgresql://postgres:5432/weather_bot_db
+      DB_URL: ${BOT_TOKEN}
+
+
     depends_on:
       - postgres
     networks:

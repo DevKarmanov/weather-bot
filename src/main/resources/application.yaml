@@ -9,6 +9,8 @@ server:
 
 spring:
   datasource:
+    username: ${POSTGRES_USER:custom_user}
+    password: ${POSTGRES_PASSWORD:sd$2sq1K52Fa}
     url: ${DB_URL:jdbc:postgresql://localhost:5432/weather_bot_db}
     driver-class-name: org.postgresql.Driver
   jpa:
