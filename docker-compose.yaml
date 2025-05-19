@@ -12,7 +12,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       WEATHER_API_KEY: ${WEATHER_API_KEY}
       CHAT_API_KEY: ${CHAT_API_KEY}
-      DB_URL: ${BOT_TOKEN}
+      DB_URL: ${DB_URL}
       PORT: ${PORT}
     depends_on:
       - postgres
