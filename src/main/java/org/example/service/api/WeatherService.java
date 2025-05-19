@@ -7,6 +7,8 @@ import org.example.dto.ForecastResponse;
 import org.example.dto.WeatherDto;
 import org.example.dto.WeatherResponse;
 import org.example.service.utils.Converter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -16,6 +18,8 @@ import java.util.concurrent.CompletableFuture;
 
 @Service
 public class WeatherService {
+
+    private static final Logger log = LoggerFactory.getLogger(AIService.class);
 
     @Value("${api.weather-api-key}")
     private String WEATHER_API_KEY;
@@ -90,6 +94,7 @@ public class WeatherService {
             return new SendMessage(String.valueOf(chatId),
                     Converter.convert(aiService.getAdvice(responseAboutCurrentWeather,responseAboutFutureWeather,useCache,refreshCache).getChoices().get(0).getMessage().getContent()));
         }catch (Exception e){
+            log.error("Ошибка при обращении к ИИ", e);
             return new SendMessage(String.valueOf(chatId),"Ошибка обращения к ИИ");
         }
 
