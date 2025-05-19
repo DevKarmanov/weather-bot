@@ -1,6 +1,7 @@
 package org.example.controller;
 
 import dev.karmanov.library.service.botCommand.BotHandler;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
@@ -17,5 +18,10 @@ public class WebHookController {
     public void getUpdate(@RequestBody Update update){
         System.out.println(update);
         botHandler.handleMessage(update);
+    }
+
+    @GetMapping("/check")
+    public ResponseEntity<String> check() {
+        return ResponseEntity.ok("ok");
     }
 }
