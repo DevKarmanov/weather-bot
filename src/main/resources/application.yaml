@@ -6,6 +6,7 @@ bot:
 server:
   ssl:
     enabled: false
+  port: 8080
 
 spring:
   datasource:
