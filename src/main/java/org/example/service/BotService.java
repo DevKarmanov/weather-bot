@@ -65,12 +65,18 @@ public class BotService {
     }
 
     private final static String CITY_INPUT_TEXT = """
-            🌤 <b>Пожалуйста, введите город, для которого хотите узнать погоду.</b>
-                                                           
-           <b>Формат:</b>
-           <code>Город</code> — пример: <code>Mogilev</code>
-           <code>Город,Страна</code> — пример: <code>Mogilev,Belarus</code>
-            """;
+        🌤 <b>Укажите город, для которого хотите узнать погоду.</b>
+
+        <b>Допустимые форматы:</b>
+        • <code>Город</code> — например: <code>Mogilev</code>  
+        • <code>Город, Страна</code> — например: <code>Mogilev, Belarus</code>
+
+        📍 Вместо текста вы также можете отправить свою геопозицию.
+
+        🌐 Страну можно указывать на русском языке.  
+        Если город не удаётся определить, попробуйте ввести его название на английском.
+        """;
+
 
     @BotText(text = "/start")
     public void startCommand(Update update){
@@ -152,7 +158,7 @@ public class BotService {
         botUtils.sendMessage("HTML",CITY_INPUT_TEXT,markup, String.valueOf(chatId));
 
         manager.setNextStep(userId,DefaultUserContext.builder()
-                        .addState(Set.of(UserState.AWAITING_TEXT,UserState.AWAITING_CALLBACK))
+                        .addState(Set.of(UserState.AWAITING_TEXT,UserState.AWAITING_CALLBACK,UserState.AWAITING_LOCATION))
                         .addActionData(Set.of("set-default-city","cancel-button","fail-option"))
                 .build());
     }
@@ -164,9 +170,27 @@ public class BotService {
         Long userId = update.getMessage().getFrom().getId();
         String text = update.getMessage().getText();
 
+        setCity(userId,chatId,text);
+    }
+
+    @BotLocation(actionName = "set-default-city")
+    @Transactional
+    public void setDefaultCityCoords(Update update) throws JsonProcessingException {
+        Message message = update.getMessage();
+        Long userId = message.getFrom().getId();
+        String chatId = message.getChatId().toString();
+
+        Location location = message.getLocation();
+        String coords = location.getLatitude() + "," + location.getLongitude();
+        log.debug("User coordinates: {}",coords);
+
+        setCity(userId,chatId,coords);
+    }
+
+    private void setCity(Long userId,String chatId,String city) throws JsonProcessingException {
         UserEntity user = userRepo.getReferenceById(userId);
         user.addRole("have-default-city");
-        user.setDefaultCity(text.toLowerCase(Locale.ROOT).trim());
+        user.setDefaultCity(city.toLowerCase(Locale.ROOT).trim());
         user.setChatId(chatId);
         userRepo.saveAndFlush(user);
 
@@ -176,11 +200,11 @@ public class BotService {
                 .button("Отмена","fail")
                 .build();
 
-        botUtils.sendMessage("HTML",weatherService.getWeatherWithForecast(text, Long.valueOf(chatId),false,true,true),markup);
+        botUtils.sendMessage("HTML",weatherService.getWeatherWithForecast(city, Long.valueOf(chatId),false,true,true),markup);
 
         manager.setNextStep(userId,DefaultUserContext.builder()
-                        .addActionData(Set.of("success-option","fail-option"))
-                        .addState(UserState.AWAITING_CALLBACK)
+                .addActionData(Set.of("success-option","fail-option"))
+                .addState(UserState.AWAITING_CALLBACK)
                 .build());
     }
 
@@ -190,12 +214,7 @@ public class BotService {
         Long chatId = callbackQuery.getMessage().getChatId();
         Long userId = callbackQuery.getFrom().getId();
 
-        String text = userRepo.findById(userId)
-                .map(UserEntity::getDefaultCity)
-                .orElse(null);
-
-
-        notifier.sendMessage(chatId,"Теперь бы будете получать ежедневную рассылку погоды по городу: "+text);
+        notifier.sendMessage(chatId,"Теперь бы будете получать ежедневную рассылку погоды по этому городу");
 
         sendMenu(String.valueOf(chatId),userId);
     }
