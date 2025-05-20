@@ -3,6 +3,7 @@ package org.example.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.karmanov.library.annotation.userActivity.BotCallBack;
+import dev.karmanov.library.annotation.userActivity.BotLocation;
 import dev.karmanov.library.annotation.userActivity.BotScheduled;
 import dev.karmanov.library.annotation.userActivity.BotText;
 import dev.karmanov.library.model.keyboard.InlineKeyboardBuilder;
@@ -25,6 +26,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
+import org.telegram.telegrambots.meta.api.objects.Location;
+import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 
@@ -45,13 +48,6 @@ public class BotService {
     private final Map<Long,String> userRequests = new HashMap<>();
 
     private final Map<String, String> cityWeatherCache = new LinkedHashMap<>() {
-        @Override
-        protected boolean removeEldestEntry(Map.Entry<String, String> eldest) {
-            return size() > 100;
-        }
-    };
-
-    private final Map<String, String> aiAdviceCache = new LinkedHashMap<>() {
         @Override
         protected boolean removeEldestEntry(Map.Entry<String, String> eldest) {
             return size() > 100;
@@ -97,7 +93,7 @@ public class BotService {
         botUtils.sendMessage("HTML",CITY_INPUT_TEXT,markup, String.valueOf(chatId));
 
         manager.setNextStep(userId,DefaultUserContext.builder()
-                        .addState(Set.of(UserState.AWAITING_TEXT,UserState.AWAITING_CALLBACK))
+                        .addState(Set.of(UserState.AWAITING_TEXT,UserState.AWAITING_CALLBACK,UserState.AWAITING_LOCATION))
                         .addActionData(Set.of("city-wait","cancel-button"))
                 .build());
     }
@@ -263,10 +259,11 @@ public class BotService {
             manager.setNextStep(userId, DefaultUserContext
                     .builder()
                     .addActionData(Set.of("city-wait","cancel-button","regenerate"))
-                    .addState(Set.of(UserState.AWAITING_TEXT,UserState.AWAITING_CALLBACK))
+                    .addState(Set.of(UserState.AWAITING_TEXT,UserState.AWAITING_CALLBACK,UserState.AWAITING_LOCATION))
                     .build());
         }
     }
+
 
     @BotCallBack(actionName = "regenerate",callbackName = "regenerate")
     public void regenerate(Update update){
@@ -320,6 +317,20 @@ public class BotService {
 
         });
         cityWeatherCache.clear();
+    }
+
+    @BotLocation(actionName = "city-wait")
+    public void setCityCoords(Update update){
+        Message message = update.getMessage();
+        Long userId = message.getFrom().getId();
+        Long chatId = message.getChatId();
+
+        Location location = message.getLocation();
+        String coords = location.getLatitude() + "," + location.getLongitude();
+        log.debug("User coordinates: {}",coords);
+
+        sendAdvice(userId,coords,chatId,true,true,false);
+
     }
 
 

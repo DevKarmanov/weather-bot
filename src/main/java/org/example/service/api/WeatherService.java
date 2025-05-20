@@ -58,15 +58,17 @@ public class WeatherService {
                 "aqi","no",
         "lang","ru");
 
+        return getWeather(queryParams);
+    }
+
+    private WeatherDto getWeather(Map<String,String> queryParams){
         CompletableFuture<String> currentWeatherFuture = CompletableFuture.supplyAsync(() ->
-                apiService.getRequest("https", "api.weatherapi.com", "/v1/current.json",
-                        queryParams,String.class));
+                apiService.getRequest("https", "api.weatherapi.com", "/v1/current.json", queryParams, String.class));
 
         CompletableFuture<String> forecastWeatherFuture = CompletableFuture.supplyAsync(() ->
-                apiService.getRequest("https", "api.weatherapi.com", "/v1/forecast.json",
-                        queryParams,String.class));
+                apiService.getRequest("https", "api.weatherapi.com", "/v1/forecast.json", queryParams, String.class));
 
-        return new WeatherDto(currentWeatherFuture.join(),forecastWeatherFuture.join());
+        return new WeatherDto(currentWeatherFuture.join(), forecastWeatherFuture.join());
     }
 
     public SendMessage getWeatherWithForecast(String text, Long chatId, boolean askAI,boolean useCache,boolean refreshCache) throws JsonProcessingException {
@@ -74,6 +76,12 @@ public class WeatherService {
 
         WeatherDto weatherDto = getWeather(text);
 
+        return getForecast(weatherDto,chatId,askAI,useCache,refreshCache);
+
+    }
+
+
+    private SendMessage getForecast(WeatherDto weatherDto,Long chatId,boolean askAI,boolean useCache,boolean refreshCache) throws JsonProcessingException {
         String responseAboutCurrentWeather = weatherDto.responseAboutCurrentWeather();
         String responseAboutFutureWeather = weatherDto.responseAboutFutureWeather();
 
@@ -97,6 +105,5 @@ public class WeatherService {
             log.error("Ошибка при обращении к ИИ", e);
             return new SendMessage(String.valueOf(chatId),"Ошибка обращения к ИИ");
         }
-
     }
 }

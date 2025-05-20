@@ -15,3 +15,5 @@ services:
       DB_URL: ${DB_URL}
     ports:
       - "5976:8080"
+
+
