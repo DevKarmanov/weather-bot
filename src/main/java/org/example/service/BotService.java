@@ -305,11 +305,19 @@ public class BotService {
 
                     String weatherInfo = weatherService.formatWeatherInformation(weather,forecast);
 
-                    String fullInfo = weatherInfo+"\n"+AIResponse.getChoices().get(0).getMessage().getContent();
+                    String fullInfo = "Рассылка погодных новостей!\n"+weatherInfo+"\n"+AIResponse.getChoices().get(0).getMessage().getContent();
 
-                    botUtils.sendMessage("HTML",fullInfo,user.getChatId());
+                    InlineKeyboardMarkup markup = new InlineKeyboardBuilder()
+                            .button("Вызвать меню","menu")
+                            .build();
+                    botUtils.sendMessage("HTML",fullInfo,markup,user.getChatId());
                     log.debug("send message to user: {}",user);
                     cityWeatherCache.put(city,fullInfo);
+
+                    manager.setNextStep(user.getUserId(),DefaultUserContext.builder()
+                                    .addState(UserState.AWAITING_CALLBACK)
+                                    .addActionData("menu-button")
+                            .build());
                 } catch (JsonProcessingException e) {
                     throw new RuntimeException(e);
                 }
@@ -317,6 +325,15 @@ public class BotService {
 
         });
         cityWeatherCache.clear();
+    }
+
+    @BotCallBack(actionName = "menu-button",callbackName = "menu")
+    public void menu(Update update){
+        CallbackQuery callbackQuery = update.getCallbackQuery();
+        Long chatId = callbackQuery.getMessage().getChatId();
+        Long userId = callbackQuery.getFrom().getId();
+
+        sendMenu(String.valueOf(chatId),userId);
     }
 
     @BotLocation(actionName = "city-wait")
