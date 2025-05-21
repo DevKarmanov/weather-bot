@@ -89,7 +89,7 @@ public class AIService {
 
 
         ChatRequest request = new ChatRequest(
-                "microsoft/phi-4-reasoning-plus:free",
+                "deepseek/deepseek-chat-v3-0324:free",
                 List.of(messageToAI)
         );
 

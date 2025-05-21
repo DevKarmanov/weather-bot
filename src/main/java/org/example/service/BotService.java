@@ -9,7 +9,7 @@ import dev.karmanov.library.annotation.userActivity.BotText;
 import dev.karmanov.library.model.keyboard.InlineKeyboardBuilder;
 import dev.karmanov.library.model.user.DefaultUserContext;
 import dev.karmanov.library.model.user.UserState;
-import dev.karmanov.library.service.notify.DefaultNotifier;
+import dev.karmanov.library.service.notify.Notifier;
 import dev.karmanov.library.service.state.StateManager;
 import org.example.dto.AI.response.OpenRouterResponse;
 import org.example.dto.weather.Root;
@@ -35,7 +35,7 @@ import java.util.*;
 @Service
 public class BotService {
     private static final Logger log = LoggerFactory.getLogger(BotService.class);
-    private final DefaultNotifier notifier;
+    private final Notifier notifier;
     private final BotUtils botUtils;
     private final WeatherService weatherService;
     private final StateManager manager;
@@ -52,7 +52,7 @@ public class BotService {
         }
     };
 
-    public BotService(DefaultNotifier notifier, BotUtils botUtils, WeatherService weatherService, StateManager manager, AIService aiService, ObjectMapper mapper, UserRepo userRepo) {
+    public BotService(Notifier notifier, BotUtils botUtils, WeatherService weatherService, StateManager manager, AIService aiService, ObjectMapper mapper, UserRepo userRepo) {
         this.notifier = notifier;
         this.botUtils = botUtils;
         this.weatherService = weatherService;
@@ -66,12 +66,12 @@ public class BotService {
         🌤 <b>Укажите город, для которого хотите узнать погоду.</b>
 
         <b>Допустимые форматы:</b>
-        • <code>Город</code> — например: <code>Mogilev</code>  
+        • <code>Город</code> — например: <code>Mogilev</code> \s
         • <code>Город, Страна</code> — например: <code>Mogilev, Belarus</code>
 
         📍 Вместо текста вы также можете отправить свою геопозицию.
 
-        🌐 Страну можно указывать на русском языке.  
+        🌐 Страну можно указывать на русском языке. \s
         Если город не удаётся определить, попробуйте ввести его название на английском.
         """;
 
