@@ -89,7 +89,7 @@ public class AIService {
 
 
         ChatRequest request = new ChatRequest(
-                "google/gemini-2.0-flash-exp:free",
+                "microsoft/phi-4-reasoning-plus:free",
                 List.of(messageToAI)
         );
 
