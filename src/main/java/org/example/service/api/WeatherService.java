@@ -14,6 +14,8 @@ import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
@@ -40,7 +42,7 @@ public class WeatherService {
         Location location = root.getLocation();
         Forecastday forecastday = root.getForecast().getForecastday().get(0);
 
-        int hour = LocalDateTime.now().getHour();
+        int hour = ZonedDateTime.now(ZoneId.of("Europe/Minsk")).getHour();
 
         Hour currHour = forecastday.getHour().get(hour);
         log.debug("All hours: {}",currHour);
