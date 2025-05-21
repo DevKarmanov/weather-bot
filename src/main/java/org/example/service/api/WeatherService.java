@@ -42,10 +42,10 @@ public class WeatherService {
         Location location = root.getLocation();
         Forecastday forecastday = root.getForecast().getForecastday().get(0);
 
-        int hour = ZonedDateTime.now(ZoneId.of("Europe/Minsk")).getHour();
+        int hour = ZonedDateTime.now(ZoneId.of(location.getTz_id())).getHour();
 
         Hour currHour = forecastday.getHour().get(hour);
-        log.debug("All hours: {}",currHour);
+        log.debug("All hours: {}",forecastday.getHour());
         log.debug("Get hour num {}:{}",hour,forecastday.getHour().get(hour));
 
         double currentTemp = currHour.getTemp_c();

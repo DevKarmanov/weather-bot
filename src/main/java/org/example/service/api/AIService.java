@@ -11,6 +11,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -69,22 +71,25 @@ public class AIService {
             - Учитывай климат и культурные особенности страны, для которой запрошен прогноз.
             - Не рекомендуй неподходящую одежду, например, не советуй надевать шубу, если на улице дождь и ветер.
             - Советы должны быть реалистичными и соответствовать тому, как обычно одеваются люди в этой стране при таких погодных условиях.
-            - Не возвращай ответ в виде JSON или других структур данных. Ответ должен быть простым, живым, человеческим текстом.
+            - Не возвращай ответ в виде JSON или других структур данных. Ответ должен быть простым, живым, человеческим текстом, без всякого форматирования. Обычный текст со смайликами
             - Пиши так, как будто ты реально советуешь человеку в чате, а не выдаёшь структурированный результат.
             
-            Данные о стране:\s""" + location.getCountry() + """
+            Страна:\s""" + location.getCountry() + """
             
             Данные о погоде на день (JSON):
             """ + forecast + """
             
-            Сформулируй краткий и практичный совет, как лучше одеться на ближайшие 2 часа. Ответ должен быть без всякого форматирования. Обычный текст со смайликами.\s
+            Текущая дата и время:
+            """+location+"""
+            
+            Сформулируй краткий и практичный совет, как лучше одеться на ближайшие 2 часа.
             """);
 
 
 
 
         ChatRequest request = new ChatRequest(
-                "deepseek/deepseek-prover-v2:free",
+                "google/gemini-2.0-flash-exp:free",
                 List.of(messageToAI)
         );
 
@@ -111,7 +116,8 @@ public class AIService {
             var node = mapper.readTree(json).get("location");
             String city = node.get("name").asText();
             String country = node.get("country").asText();
-            return new Location(city, country);
+            ZonedDateTime dateTime = ZonedDateTime.now(ZoneId.of(node.get("tz_id").asText()));
+            return new Location(city,country,dateTime);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e.getMessage());
         }

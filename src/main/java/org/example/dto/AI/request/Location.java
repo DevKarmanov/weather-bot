@@ -5,6 +5,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.ZonedDateTime;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -12,6 +14,7 @@ import lombok.Setter;
 public class Location {
     private String city;
     private String country;
+    private ZonedDateTime zonedDateTime;
 
     @Override
     public String toString() {
