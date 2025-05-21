@@ -40,11 +40,16 @@ public class WeatherService {
         Location location = root.getLocation();
         Forecastday forecastday = root.getForecast().getForecastday().get(0);
 
-        Hour currHour = forecastday.getHour().get(LocalDateTime.now().getHour());
+        int hour = LocalDateTime.now().getHour();
+
+        Hour currHour = forecastday.getHour().get(hour);
+        log.debug("All hours: {}",currHour);
+        log.debug("Get hour num {}:{}",hour,forecastday.getHour().get(hour));
+
         double currentTemp = currHour.getTemp_c();
         String currentCondition = currHour.getCondition().getText();
 
-        Hour futeHour = forecastday.getHour().get(LocalDateTime.now().getHour()+2);
+        Hour futeHour = forecastday.getHour().get(hour+2);
         double tempAfter2 = futeHour.getTemp_c();
         String conditionAfter2 = futeHour.getCondition().getText();
 
