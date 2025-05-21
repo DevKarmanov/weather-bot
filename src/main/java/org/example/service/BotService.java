@@ -12,9 +12,7 @@ import dev.karmanov.library.model.user.UserState;
 import dev.karmanov.library.service.notify.DefaultNotifier;
 import dev.karmanov.library.service.state.StateManager;
 import org.example.dto.AI.response.OpenRouterResponse;
-import org.example.dto.ForecastResponse;
-import org.example.dto.WeatherDto;
-import org.example.dto.WeatherResponse;
+import org.example.dto.weather.Root;
 import org.example.model.UserEntity;
 import org.example.repository.UserRepo;
 import org.example.service.api.AIService;
@@ -100,7 +98,7 @@ public class BotService {
 
         manager.setNextStep(userId,DefaultUserContext.builder()
                         .addState(Set.of(UserState.AWAITING_TEXT,UserState.AWAITING_CALLBACK,UserState.AWAITING_LOCATION))
-                        .addActionData(Set.of("city-wait","cancel-button"))
+                        .addActionData(Set.of("city-wait","cancel-button","start-command-method"))
                 .build());
     }
 
@@ -132,8 +130,8 @@ public class BotService {
     private void setDefaultMenuStates(Long userId){
         manager.setNextStep(userId, DefaultUserContext
                 .builder()
-                .addActionData(Set.of("weather-search","default-city-button"))
-                .addState(UserState.AWAITING_CALLBACK)
+                .addActionData(Set.of("weather-search","default-city-button","start-command-method"))
+                .addState(Set.of(UserState.AWAITING_CALLBACK,UserState.AWAITING_TEXT))
                 .build());
     }
 
@@ -159,7 +157,7 @@ public class BotService {
 
         manager.setNextStep(userId,DefaultUserContext.builder()
                         .addState(Set.of(UserState.AWAITING_TEXT,UserState.AWAITING_CALLBACK,UserState.AWAITING_LOCATION))
-                        .addActionData(Set.of("set-default-city","cancel-button","fail-option"))
+                        .addActionData(Set.of("set-default-city","cancel-button","fail-option","start-command-method"))
                 .build());
     }
 
@@ -277,7 +275,7 @@ public class BotService {
         } finally {
             manager.setNextStep(userId, DefaultUserContext
                     .builder()
-                    .addActionData(Set.of("city-wait","cancel-button","regenerate"))
+                    .addActionData(Set.of("city-wait","cancel-button","regenerate","start-command-method"))
                     .addState(Set.of(UserState.AWAITING_TEXT,UserState.AWAITING_CALLBACK,UserState.AWAITING_LOCATION))
                     .build());
         }
@@ -312,17 +310,11 @@ public class BotService {
                 botUtils.sendMessage("HTML",cityWeatherCache.get(city),user.getChatId());
             }else {
                 try {
-                    WeatherDto weatherDto = weatherService.getWeather(city);
+                    String forecast = weatherService.getWeather(city);
 
-                    String responseAboutCurrentWeather = weatherDto.responseAboutCurrentWeather();
-                    String responseAboutFutureWeather = weatherDto.responseAboutFutureWeather();
+                    OpenRouterResponse AIResponse = aiService.getAdvice(forecast,false,true);
 
-                    WeatherResponse weather = mapper.readValue(responseAboutCurrentWeather, WeatherResponse.class);
-                    ForecastResponse forecast = mapper.readValue(responseAboutFutureWeather, ForecastResponse.class);
-
-                    OpenRouterResponse AIResponse = aiService.getAdvice(responseAboutCurrentWeather,responseAboutFutureWeather,false,true);
-
-                    String weatherInfo = weatherService.formatWeatherInformation(weather,forecast);
+                    String weatherInfo = weatherService.formatWeatherInformation(mapper.readValue(forecast, Root.class));
 
                     String fullInfo = "Рассылка погодных новостей!\n"+weatherInfo+"\n"+AIResponse.getChoices().get(0).getMessage().getContent();
 
@@ -334,8 +326,8 @@ public class BotService {
                     cityWeatherCache.put(city,fullInfo);
 
                     manager.setNextStep(user.getUserId(),DefaultUserContext.builder()
-                                    .addState(UserState.AWAITING_CALLBACK)
-                                    .addActionData("menu-button")
+                                    .addState(Set.of(UserState.AWAITING_CALLBACK))
+                                    .addActionData(Set.of("menu-button","start-command-method"))
                             .build());
                 } catch (JsonProcessingException e) {
                     throw new RuntimeException(e);

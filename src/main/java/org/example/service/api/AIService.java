@@ -33,8 +33,8 @@ public class AIService {
         this.mapper = mapper;
     }
 
-    public OpenRouterResponse getAdvice(String responseAboutCurrentWeather, String responseAboutFutureWeather, boolean useCache, boolean refreshCache) {
-        Location location = extractLocation(responseAboutCurrentWeather);
+    public OpenRouterResponse getAdvice(String forecast, boolean useCache, boolean refreshCache) {
+        Location location = extractLocation(forecast);
         long currentMillis = System.currentTimeMillis();
 
         log.info("Получение совета для города: {}", location);
@@ -74,13 +74,10 @@ public class AIService {
             
             Данные о стране:\s""" + location.getCountry() + """
             
-            Данные о текущей погоде (JSON):
-            """ + responseAboutCurrentWeather + """
+            Данные о погоде на день (JSON):
+            """ + forecast + """
             
-            Данные о прогнозе погоды на ближайшие 2 часа (JSON):
-            """ + responseAboutFutureWeather + """
-            
-            Сформулируй краткий и практичный совет, как лучше одеться на ближайшие 2 часа.
+            Сформулируй краткий и практичный совет, как лучше одеться на ближайшие 2 часа. Ответ должен быть без всякого форматирования. Обычный текст со смайликами.\s
             """);
 
 

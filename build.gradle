@@ -17,7 +17,8 @@ dependencies {
     implementation 'com.github.DevKarmanov:tg-simple-api-lib:v1.1.1'
     implementation 'org.hibernate.validator:hibernate-validator:8.0.1.Final'
     implementation 'org.springframework.boot:spring-boot-starter-actuator:3.4.4'
-
+    compileOnly 'org.projectlombok:lombok:1.18.32'
+    annotationProcessor 'org.projectlombok:lombok:1.18.32'
     //implementation 'dev.karmanov:tg-simple-api-lib:1.17-SNAPSHOT'
     implementation 'org.springframework.boot:spring-boot-starter-webflux:3.4.5'
     implementation 'org.postgresql:postgresql:42.7.5'
